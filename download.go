@@ -15,6 +15,27 @@ import (
 
 var checksumSHA256 = regexp.MustCompile(`^sha256:([a-fA-F0-9]{64})$`)
 
+func archiveRequestNetworkHint() string {
+	return "\nHint: check network connectivity, DNS, and whether the archive URL is reachable."
+}
+
+func archiveDownloadHTTPHint(status int) string {
+	switch status {
+	case http.StatusUnauthorized:
+		return "\nHint: this archive URL may require authentication."
+	case http.StatusForbidden:
+		return "\nHint: access to the archive URL was denied — check credentials or signed URL expiry."
+	case http.StatusNotFound:
+		return "\nHint: archive not found — the URL may have expired or the version may be unavailable."
+	case http.StatusTooManyRequests:
+		return "\nHint: rate limited — back off and retry."
+	case http.StatusServiceUnavailable:
+		return "\nHint: archive host temporarily unavailable — retry later."
+	default:
+		return ""
+	}
+}
+
 // DownloadSkillResult is returned after a successful archive download.
 type DownloadSkillResult struct {
 	ArchivePath string
@@ -62,11 +83,11 @@ func DownloadSkillArchive(ctx context.Context, spec string, opts DownloadSkillOp
 	}
 	res, err := HTTPClient.Do(req)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("archive request failed: %w%s", err, archiveRequestNetworkHint())
 	}
 	defer res.Body.Close()
 	if res.StatusCode < 200 || res.StatusCode >= 300 {
-		return nil, fmt.Errorf("download failed %s: %s", res.Status, meta.ArchiveURL)
+		return nil, fmt.Errorf("download failed %s: %s%s", res.Status, meta.ArchiveURL, archiveDownloadHTTPHint(res.StatusCode))
 	}
 
 	f, err := os.Create(dest)
