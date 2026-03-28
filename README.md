@@ -27,4 +27,8 @@ go test ./...
 
 ## Лицензия
 
-MIT
+MIT — см. [LICENSE](LICENSE).
+
+## Безопасность
+
+Сообщения об уязвимостях: [SECURITY.md](SECURITY.md).
