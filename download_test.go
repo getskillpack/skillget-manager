@@ -20,7 +20,8 @@ func TestDownloadSkillArchive_checksumOK(t *testing.T) {
 	sum := sha256.Sum256(payload)
 	checksum := "sha256:" + hex.EncodeToString(sum[:])
 
-	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+	var ts *httptest.Server
+	ts = httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		switch r.URL.Path {
 		case "/api/v1/skills/demo":
 			lv := "1.0.0"
@@ -29,7 +30,7 @@ func TestDownloadSkillArchive_checksumOK(t *testing.T) {
 			_ = json.NewEncoder(w).Encode(VersionDetail{
 				Name:       "demo",
 				Version:    "1.0.0",
-				ArchiveURL: "https://" + r.Host + "/blob.tgz",
+				ArchiveURL: ts.URL + "/blob.tgz",
 				Checksum:   checksum,
 			})
 		case "/blob.tgz":
@@ -57,7 +58,8 @@ func TestDownloadSkillArchive_checksumMismatch(t *testing.T) {
 	prev := HTTPClient
 	t.Cleanup(func() { HTTPClient = prev })
 
-	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+	var ts *httptest.Server
+	ts = httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		switch r.URL.Path {
 		case "/api/v1/skills/demo":
 			lv := "1.0.0"
@@ -66,7 +68,7 @@ func TestDownloadSkillArchive_checksumMismatch(t *testing.T) {
 			_ = json.NewEncoder(w).Encode(VersionDetail{
 				Name:       "demo",
 				Version:    "1.0.0",
-				ArchiveURL: "https://" + r.Host + "/blob.tgz",
+				ArchiveURL: ts.URL + "/blob.tgz",
 				Checksum:   "sha256:0000000000000000000000000000000000000000000000000000000000000000",
 			})
 		case "/blob.tgz":
