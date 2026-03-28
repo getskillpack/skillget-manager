@@ -2,29 +2,21 @@
 
 Библиотека ядра менеджера пакетов скиллов для org [getskillpack](https://github.com/getskillpack): клиент реестра, `skills.lock`, поиск и загрузка архивов.
 
+**Стек:** Go 1.22+. Прототип на TypeScript **снят** (март 2026, согласование board); ядро только на Go.
+
 ## Зачем отдельный репозиторий
 
-CLI ([cli](https://github.com/getskillpack/cli)) остаётся тонкой оболочкой (`skillget`). Вся логика установки и контракт с реестром живёт здесь, чтобы board и интеграции смотрели на **менеджер** и **registry**, а не только на CLI.
+CLI ([cli](https://github.com/getskillpack/cli)) остаётся тонкой оболочкой (`skillget`). Вся логика установки и контракт с реестром живёт здесь.
 
-## API (кратко)
+## Контракт реестра
 
-- `registryBaseUrl` / `registryConfigSource` — выбор базы API из env (`SKILLGET_REGISTRY_URL`, legacy `SKPKG_REGISTRY_URL`).
-- `fetchJson` — JSON-запросы к реестру.
-- `readSkillsLock` / `writeSkillsLock` — файл `skills.lock`.
-- `searchSkills` — список/поиск скиллов.
-- `resolveInstallTarget` — разрешение версии и метаданные архива.
-- `downloadSkillArchive` — скачивание tarball и обновление lockfile.
-
-Контракт HTTP API реестра: [registry/API.md](https://github.com/getskillpack/registry/blob/main/API.md).
+Черновик HTTP API: [registry/API.md](https://github.com/getskillpack/registry/blob/main/API.md).
 
 ## Разработка
 
 ```bash
-npm install
-npm run build
+go test ./...
 ```
-
-Node 18+.
 
 ## Лицензия
 
