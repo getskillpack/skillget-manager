@@ -9,10 +9,10 @@ type SkillsLockfile struct {
 // ListSkillsResponse is the registry list/search JSON envelope.
 type ListSkillsResponse struct {
 	Data []struct {
-		Name           string `json:"name"`
-		Description    string `json:"description,omitempty"`
-		Author         string `json:"author,omitempty"`
-		LatestVersion  string `json:"latest_version,omitempty"`
+		Name          string `json:"name"`
+		Description   string `json:"description,omitempty"`
+		Author        string `json:"author,omitempty"`
+		LatestVersion string `json:"latest_version,omitempty"`
 	} `json:"data"`
 	Meta *struct {
 		Total int `json:"total,omitempty"`
@@ -29,16 +29,16 @@ type VersionDetail struct {
 
 // SkillDetail is skill metadata from the registry.
 type SkillDetail struct {
-	Name           string `json:"name"`
-	RepositoryURL  *string `json:"repository_url"`
-	Homepage       *string `json:"homepage"`
-	Dependencies   []struct {
+	Name          string  `json:"name"`
+	RepositoryURL *string `json:"repository_url"`
+	Homepage      *string `json:"homepage"`
+	Dependencies  []struct {
 		Name  string `json:"name"`
 		Range string `json:"range,omitempty"`
 	} `json:"dependencies,omitempty"`
 	LatestVersion *string `json:"latest_version"`
 	Versions      []struct {
-		Version   string `json:"version"`
-		IsYanked  bool   `json:"is_yanked,omitempty"`
+		Version  string `json:"version"`
+		IsYanked bool   `json:"is_yanked,omitempty"`
 	} `json:"versions,omitempty"`
 }

@@ -44,7 +44,7 @@ func FetchJSON(ctx context.Context, path string, out any) error {
 		if text == "" {
 			text = url
 		}
-		return fmt.Errorf("registry %s %s: %s", res.Status, res.Status, text)
+		return fmt.Errorf("registry %s: %s", res.Status, text)
 	}
 	if err := json.Unmarshal(body, out); err != nil {
 		return fmt.Errorf("decode json: %w", err)
