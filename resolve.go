@@ -35,21 +35,9 @@ func ResolveInstallTarget(ctx context.Context, spec string) (*VersionDetail, err
 		if err := FetchJSON(ctx, path, &detail); err != nil {
 			return nil, err
 		}
-		if detail.LatestVersion != nil && *detail.LatestVersion != "" {
-			version = *detail.LatestVersion
-		} else {
-			var latest string
-			for _, v := range detail.Versions {
-				if v.IsYanked {
-					continue
-				}
-				latest = v.Version
-				break
-			}
-			if latest == "" {
-				return nil, fmt.Errorf("no installable versions for skill %q", nv.Name)
-			}
-			version = latest
+		version = pickInstallableVersion(detail)
+		if version == "" {
+			return nil, fmt.Errorf("no installable versions for skill %q", nv.Name)
 		}
 	}
 	var vd VersionDetail
@@ -58,4 +46,36 @@ func ResolveInstallTarget(ctx context.Context, spec string) (*VersionDetail, err
 		return nil, err
 	}
 	return &vd, nil
+}
+
+// pickInstallableVersion chooses a version for an unpinned install.
+// Prefers registry latest_version when present and not marked yanked in versions[];
+// otherwise the first non-yanked entry in versions (registry order).
+func pickInstallableVersion(d SkillDetail) string {
+	if d.LatestVersion != nil {
+		candidate := strings.TrimSpace(*d.LatestVersion)
+		if candidate != "" && !versionMarkedYanked(d, candidate) {
+			return candidate
+		}
+	}
+	for _, v := range d.Versions {
+		if v.IsYanked {
+			continue
+		}
+		if v.Version != "" {
+			return v.Version
+		}
+	}
+	return ""
+}
+
+// versionMarkedYanked reports whether v appears in d.Versions with is_yanked true.
+// If v is not listed, returns false (trust latest_version from the registry).
+func versionMarkedYanked(d SkillDetail, v string) bool {
+	for _, row := range d.Versions {
+		if row.Version == v {
+			return row.IsYanked
+		}
+	}
+	return false
 }

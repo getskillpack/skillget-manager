@@ -119,3 +119,46 @@ func TestResolveInstallTarget_latestVersionField(t *testing.T) {
 		t.Fatalf("expected latest_version 9.9.9, got %+v", vd)
 	}
 }
+
+func TestResolveInstallTarget_latestVersionYankedUsesNext(t *testing.T) {
+	prev := HTTPClient
+	t.Cleanup(func() { HTTPClient = prev })
+
+	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		switch r.URL.Path {
+		case "/api/v1/skills/demo":
+			lv := "2.0.0"
+			_ = json.NewEncoder(w).Encode(SkillDetail{
+				Name:          "demo",
+				LatestVersion: &lv,
+				Versions: []struct {
+					Version  string `json:"version"`
+					IsYanked bool   `json:"is_yanked,omitempty"`
+				}{
+					{Version: "2.0.0", IsYanked: true},
+					{Version: "1.0.0"},
+				},
+			})
+		case "/api/v1/skills/demo/versions/1.0.0":
+			_ = json.NewEncoder(w).Encode(VersionDetail{
+				Name:       "demo",
+				Version:    "1.0.0",
+				ArchiveURL: "https://example.invalid/d.tgz",
+			})
+		default:
+			http.NotFound(w, r)
+		}
+	}))
+	defer ts.Close()
+
+	t.Setenv("SKILLGET_REGISTRY_URL", ts.URL+"/api/v1")
+	HTTPClient = ts.Client()
+
+	vd, err := ResolveInstallTarget(context.Background(), "demo")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if vd.Version != "1.0.0" {
+		t.Fatalf("expected fallback to 1.0.0 when latest_version is yanked, got %+v", vd)
+	}
+}
