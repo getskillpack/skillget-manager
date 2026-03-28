@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.1.2 — 2026-03-28
+
+- Подсказка при ответе реестра **HTTP 429** (rate limit) для `FetchJSON` и `PublishSkill`.
+
 ## 0.1.1 — 2026-03-28
 
 - Тесты `DownloadSkillArchive`: `archive_url` в моках указывает на `httptest` по HTTP (раньше был `https://` + `127.0.0.1`, клиент падал с «HTTP response to HTTPS client»).
@@ -19,6 +23,4 @@
 - Документация: `SECURITY.md`, ссылки на лицензию и процесс безопасности в README.
 
 ## Unreleased
-
-- Подсказка при ответе реестра **HTTP 429** (rate limit) для `FetchJSON` и `PublishSkill`.
 
