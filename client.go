@@ -31,7 +31,7 @@ func FetchJSON(ctx context.Context, path string, out any) error {
 
 	res, err := HTTPClient.Do(req)
 	if err != nil {
-		return err
+		return fmt.Errorf("registry request failed: %w%s", err, registryNetworkHint())
 	}
 	defer res.Body.Close()
 
@@ -44,7 +44,7 @@ func FetchJSON(ctx context.Context, path string, out any) error {
 		if text == "" {
 			text = url
 		}
-		return fmt.Errorf("registry %s: %s", res.Status, text)
+		return fmt.Errorf("registry %s: %s%s", res.Status, text, registryHintForStatus(res.StatusCode))
 	}
 	if err := json.Unmarshal(body, out); err != nil {
 		return fmt.Errorf("decode json: %w", err)

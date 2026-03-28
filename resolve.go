@@ -35,18 +35,22 @@ func ResolveInstallTarget(ctx context.Context, spec string) (*VersionDetail, err
 		if err := FetchJSON(ctx, path, &detail); err != nil {
 			return nil, err
 		}
-		var latest string
-		for _, v := range detail.Versions {
-			if v.IsYanked {
-				continue
+		if detail.LatestVersion != nil && *detail.LatestVersion != "" {
+			version = *detail.LatestVersion
+		} else {
+			var latest string
+			for _, v := range detail.Versions {
+				if v.IsYanked {
+					continue
+				}
+				latest = v.Version
+				break
 			}
-			latest = v.Version
-			break
+			if latest == "" {
+				return nil, fmt.Errorf("no installable versions for skill %q", nv.Name)
+			}
+			version = latest
 		}
-		if latest == "" {
-			return nil, fmt.Errorf("no installable versions for skill %q", nv.Name)
-		}
-		version = latest
 	}
 	var vd VersionDetail
 	vpath := "/skills/" + url.PathEscape(nv.Name) + "/versions/" + url.PathEscape(version)

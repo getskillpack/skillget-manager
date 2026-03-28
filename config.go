@@ -37,3 +37,20 @@ func RegistryConfigSource() string {
 	}
 	return "default"
 }
+
+func trimToken(raw string) string {
+	t := strings.TrimSpace(raw)
+	if t == "" {
+		return ""
+	}
+	return t
+}
+
+// RegistryToken returns the bearer token for authenticated registry calls (e.g. publish).
+// SKILLGET_REGISTRY_TOKEN wins; SKILLGET_TOKEN is a legacy alias.
+func RegistryToken() string {
+	if t := trimToken(os.Getenv("SKILLGET_REGISTRY_TOKEN")); t != "" {
+		return t
+	}
+	return trimToken(os.Getenv("SKILLGET_TOKEN"))
+}

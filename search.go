@@ -10,6 +10,7 @@ import (
 // SearchSkillsOptions mirrors the TS SearchSkillsOptions.
 type SearchSkillsOptions struct {
 	Query  string
+	Author string // optional registry filter (query param author)
 	Limit  int
 	Offset int
 }
@@ -26,6 +27,9 @@ func SearchSkills(ctx context.Context, opts SearchSkillsOptions) (*ListSkillsRes
 	q.Set("offset", strconv.Itoa(offset))
 	if opts.Query != "" {
 		q.Set("q", opts.Query)
+	}
+	if opts.Author != "" {
+		q.Set("author", opts.Author)
 	}
 	path := "/skills?" + q.Encode()
 	var out ListSkillsResponse

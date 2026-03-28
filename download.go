@@ -2,12 +2,18 @@ package skillgetmanager
 
 import (
 	"context"
+	"crypto/sha256"
+	"encoding/hex"
 	"fmt"
 	"io"
 	"net/http"
 	"os"
 	"path/filepath"
+	"regexp"
+	"strings"
 )
+
+var checksumSHA256 = regexp.MustCompile(`^sha256:([a-fA-F0-9]{64})$`)
 
 // DownloadSkillResult is returned after a successful archive download.
 type DownloadSkillResult struct {
@@ -67,9 +73,16 @@ func DownloadSkillArchive(ctx context.Context, spec string, opts DownloadSkillOp
 	if err != nil {
 		return nil, err
 	}
-	defer f.Close()
-
 	if _, err := io.Copy(f, res.Body); err != nil {
+		_ = os.Remove(dest)
+		return nil, err
+	}
+	if err := f.Close(); err != nil {
+		_ = os.Remove(dest)
+		return nil, err
+	}
+
+	if err := verifyDownloadSHA256(dest, meta.Checksum); err != nil {
 		_ = os.Remove(dest)
 		return nil, err
 	}
@@ -88,4 +101,29 @@ func DownloadSkillArchive(ctx context.Context, spec string, opts DownloadSkillOp
 	out.Meta.Version = meta.Version
 	out.Meta.Checksum = meta.Checksum
 	return out, nil
+}
+
+func verifyDownloadSHA256(path, want string) error {
+	want = strings.TrimSpace(want)
+	if want == "" {
+		return nil
+	}
+	m := checksumSHA256.FindStringSubmatch(want)
+	if m == nil {
+		return fmt.Errorf("unsupported checksum format %q (expected sha256:<64 hex>)", want)
+	}
+	f, err := os.Open(path)
+	if err != nil {
+		return err
+	}
+	defer f.Close()
+	h := sha256.New()
+	if _, err := io.Copy(h, f); err != nil {
+		return err
+	}
+	got := hex.EncodeToString(h.Sum(nil))
+	if !strings.EqualFold(got, m[1]) {
+		return fmt.Errorf("checksum mismatch for %s: expected %s, got %s", filepath.Base(path), m[1], got)
+	}
+	return nil
 }
