@@ -27,7 +27,7 @@ CI should run the full suite when the registry URL and credentials are available
 
 ## Work alongside the CLI
 
-During active development, `getskillpack/cli` often uses a `replace` in `go.mod` pointing at a local clone of this module. After tagged releases are visible to the Go module proxy, trim or remove `replace` and bump the required version in `cli`.
+`getskillpack/cli` pins this module by **semver** in `go.mod`. For a local loop you can still add a temporary `replace` → sibling checkout. With **private** org repos, CLI contributors and CI use `GOPRIVATE` / `GONOSUMDB` and Git credentials (see `cli` repo `docs/BOARD_PAT_QUICK_RU.md` § 4). When the module is public on the Go proxy, drop `GOPRIVATE` for this path and use plain `go get …@vX.Y.Z`.
 
 Registry contract: [`getskillpack/registry` API](https://github.com/getskillpack/registry/blob/main/docs/registry-api.md).
 
