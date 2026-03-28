@@ -20,6 +20,8 @@ func registryHintForStatus(status int) string {
 		return "\nHint: this version was yanked and cannot be installed."
 	case 422:
 		return "\nHint: manifest or form fields failed validation — compare with the registry API schema."
+	case 429:
+		return "\nHint: rate limited — back off and retry; reduce parallel requests if you batch installs or publishes."
 	case 503:
 		return "\nHint: registry write API may be disabled on the server."
 	default:

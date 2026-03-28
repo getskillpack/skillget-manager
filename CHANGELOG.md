@@ -19,3 +19,6 @@
 - Документация: `SECURITY.md`, ссылки на лицензию и процесс безопасности в README.
 
 ## Unreleased
+
+- Подсказка при ответе реестра **HTTP 429** (rate limit) для `FetchJSON` и `PublishSkill`.
+
