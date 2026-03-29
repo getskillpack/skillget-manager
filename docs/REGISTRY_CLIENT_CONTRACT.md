@@ -2,6 +2,8 @@
 
 Канон спецификации сервера: [`docs/registry-api.md`](https://github.com/getskillpack/registry/blob/main/docs/registry-api.md) (раздел **Compiled core**). Этот документ фиксирует поведение библиотеки `github.com/getskillpack/skillget-manager` как **скомпилированного клиента**.
 
+Операторам реестра (деплой, токены, эксплуатация): [`REFERENCE_REGISTRY_OPERATIONS_RU.md`](https://github.com/getskillpack/registry/blob/main/docs/REFERENCE_REGISTRY_OPERATIONS_RU.md).
+
 ## Переменные окружения
 
 | Переменная | Назначение |
