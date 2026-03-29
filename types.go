@@ -1,5 +1,10 @@
 package skillgetmanager
 
+import (
+	"encoding/json"
+	"time"
+)
+
 // SkillsLockfile is the on-disk lockfile shape (v1).
 type SkillsLockfile struct {
 	LockfileVersion int               `json:"lockfileVersion"`
@@ -9,36 +14,41 @@ type SkillsLockfile struct {
 // ListSkillsResponse is the registry list/search JSON envelope.
 type ListSkillsResponse struct {
 	Data []struct {
-		Name          string `json:"name"`
-		Description   string `json:"description,omitempty"`
-		Author        string `json:"author,omitempty"`
-		LatestVersion string `json:"latest_version,omitempty"`
+		Name          string    `json:"name"`
+		Description   string    `json:"description,omitempty"`
+		Author        string    `json:"author,omitempty"`
+		LatestVersion string    `json:"latest_version,omitempty"`
+		CreatedAt     time.Time `json:"created_at,omitempty"`
 	} `json:"data"`
 	Meta *struct {
-		Total int `json:"total,omitempty"`
+		Total  int `json:"total,omitempty"`
+		Limit  int `json:"limit,omitempty"`
+		Offset int `json:"offset,omitempty"`
 	} `json:"meta,omitempty"`
 }
 
-// VersionDetail is returned for a concrete skill version (install target).
+// VersionPublicInfo matches GET /skills/{name} → versions[version] in registry-api.md.
+type VersionPublicInfo struct {
+	Manifest    json.RawMessage `json:"manifest,omitempty"`
+	Checksum    string          `json:"checksum,omitempty"`
+	ArchiveURL  string          `json:"archive_url,omitempty"`
+	PublishedAt time.Time       `json:"published_at,omitempty"`
+	Yanked      bool            `json:"yanked,omitempty"`
+}
+
+// SkillDetail is returned by GET /skills/{name} (registry compiled-core contract).
+type SkillDetail struct {
+	Name        string                       `json:"name"`
+	Description string                       `json:"description,omitempty"`
+	Author      string                       `json:"author,omitempty"`
+	CreatedAt   time.Time                    `json:"created_at,omitempty"`
+	Versions    map[string]VersionPublicInfo `json:"versions,omitempty"`
+}
+
+// VersionDetail is returned for GET /skills/{name}/versions/{version} (install target).
 type VersionDetail struct {
 	Name       string `json:"name"`
 	Version    string `json:"version"`
 	ArchiveURL string `json:"archive_url"`
 	Checksum   string `json:"checksum,omitempty"`
-}
-
-// SkillDetail is skill metadata from the registry.
-type SkillDetail struct {
-	Name          string  `json:"name"`
-	RepositoryURL *string `json:"repository_url"`
-	Homepage      *string `json:"homepage"`
-	Dependencies  []struct {
-		Name  string `json:"name"`
-		Range string `json:"range,omitempty"`
-	} `json:"dependencies,omitempty"`
-	LatestVersion *string `json:"latest_version"`
-	Versions      []struct {
-		Version  string `json:"version"`
-		IsYanked bool   `json:"is_yanked,omitempty"`
-	} `json:"versions,omitempty"`
 }

@@ -9,7 +9,7 @@ func registryHintForStatus(status int) string {
 	case 400:
 		return "\nHint: request may be invalid — check query params and paths against the registry API."
 	case 401:
-		return "\nHint: set SKILLGET_REGISTRY_TOKEN (or SKILLGET_TOKEN) for authenticated requests."
+		return "\nHint: set SKILLGET_REGISTRY_READ_TOKEN for GET /api/v1 (read token), or SKILLGET_REGISTRY_TOKEN / SKILLGET_TOKEN if the same bearer is used for reads."
 	case 403:
 		return "\nHint: token may lack permission, or the registry blocks this operation for anonymous clients."
 	case 404:

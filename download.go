@@ -81,6 +81,9 @@ func DownloadSkillArchive(ctx context.Context, spec string, opts DownloadSkillOp
 	if err != nil {
 		return nil, err
 	}
+	if t := RegistryReadBearer(); t != "" {
+		req.Header.Set("Authorization", "Bearer "+t)
+	}
 	res, err := HTTPClient.Do(req)
 	if err != nil {
 		return nil, fmt.Errorf("archive request failed: %w%s", err, archiveRequestNetworkHint())

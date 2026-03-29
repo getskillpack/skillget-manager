@@ -54,3 +54,13 @@ func RegistryToken() string {
 	}
 	return trimToken(os.Getenv("SKILLGET_TOKEN"))
 }
+
+// RegistryReadBearer returns the Bearer token for GET /api/v1/* and archive downloads
+// when the registry operator enabled REGISTRY_READ_TOKEN. SKILLGET_REGISTRY_READ_TOKEN
+// wins when set; otherwise falls back to RegistryToken() so one secret can cover read+write.
+func RegistryReadBearer() string {
+	if t := trimToken(os.Getenv("SKILLGET_REGISTRY_READ_TOKEN")); t != "" {
+		return t
+	}
+	return RegistryToken()
+}

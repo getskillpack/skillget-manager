@@ -4,7 +4,10 @@ import (
 	"context"
 	"fmt"
 	"net/url"
+	"sort"
 	"strings"
+
+	"golang.org/x/mod/semver"
 )
 
 // NameVersion holds a parsed skill spec "name" or "name@version".
@@ -48,34 +51,32 @@ func ResolveInstallTarget(ctx context.Context, spec string) (*VersionDetail, err
 	return &vd, nil
 }
 
-// pickInstallableVersion chooses a version for an unpinned install.
-// Prefers registry latest_version when present and not marked yanked in versions[];
-// otherwise the first non-yanked entry in versions (registry order).
+// pickInstallableVersion chooses the highest semver among non-yanked versions in the
+// skill detail map, matching reference registry logic (see getskillpack/registry filestore).
 func pickInstallableVersion(d SkillDetail) string {
-	if d.LatestVersion != nil {
-		candidate := strings.TrimSpace(*d.LatestVersion)
-		if candidate != "" && !versionMarkedYanked(d, candidate) {
-			return candidate
-		}
+	if len(d.Versions) == 0 {
+		return ""
 	}
-	for _, v := range d.Versions {
-		if v.IsYanked {
+	var keys []string
+	for v, info := range d.Versions {
+		v = strings.TrimSpace(v)
+		if v == "" || info.Yanked {
 			continue
 		}
-		if v.Version != "" {
-			return v.Version
-		}
+		keys = append(keys, v)
 	}
-	return ""
+	if len(keys) == 0 {
+		return ""
+	}
+	sort.Slice(keys, func(i, j int) bool {
+		return semver.Compare(canonicalSemver(keys[i]), canonicalSemver(keys[j])) < 0
+	})
+	return keys[len(keys)-1]
 }
 
-// versionMarkedYanked reports whether v appears in d.Versions with is_yanked true.
-// If v is not listed, returns false (trust latest_version from the registry).
-func versionMarkedYanked(d SkillDetail, v string) bool {
-	for _, row := range d.Versions {
-		if row.Version == v {
-			return row.IsYanked
-		}
+func canonicalSemver(v string) string {
+	if !strings.HasPrefix(v, "v") {
+		return "v" + v
 	}
-	return false
+	return v
 }
