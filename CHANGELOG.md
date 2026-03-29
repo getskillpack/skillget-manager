@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.1.4 — 2026-03-29
+
+- **Breaking (контракт JSON):** `SkillDetail` приведён к канону `GET /skills/{name}` из [registry-api.md](https://github.com/getskillpack/registry/blob/main/docs/registry-api.md): поле `versions` — объект `map[version]`, флаг **`yanked`**, без вымышленного `latest_version` на детали скилла.
+- `ResolveInstallTarget` без pin: выбор **максимальной semver** среди неснятых версий (как `latestNonYanked` в reference store).
+- `FetchJSON` и загрузка архива: опциональный `Authorization: Bearer` из `SKILLGET_REGISTRY_READ_TOKEN` или fallback на токен записи (`RegistryReadBearer`).
+- Документ для board/интеграций: [docs/REGISTRY_CLIENT_CONTRACT.md](docs/REGISTRY_CLIENT_CONTRACT.md).
+- Зависимость: `golang.org/x/mod/semver` для сортировки версий.
+
 ## 0.1.3 — 2026-03-28
 
 - `DownloadSkillArchive`: подсказки при сетевых сбоях и при ответах **401 / 403 / 404 / 429 / 503** от хоста архива (URL может отличаться от базы реестра).
@@ -26,8 +34,4 @@
 - `DownloadSkillArchive`: проверка SHA-256 при `checksum` в формате `sha256:<64 hex>`.
 - Сообщения об ошибках HTTP к реестру с краткими подсказками (как в TS `registry.ts`).
 - Документация: `SECURITY.md`, ссылки на лицензию и процесс безопасности в README.
-
-## Unreleased
-
-- README: явно описаны подсказки в ошибках для запросов к реестру и для скачивания архива.
 

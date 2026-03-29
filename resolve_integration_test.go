@@ -17,12 +17,9 @@ func TestResolveInstallTarget_latest(t *testing.T) {
 		case "/api/v1/skills/demo":
 			_ = json.NewEncoder(w).Encode(SkillDetail{
 				Name: "demo",
-				Versions: []struct {
-					Version  string `json:"version"`
-					IsYanked bool   `json:"is_yanked,omitempty"`
-				}{
-					{Version: "2.0.0", IsYanked: true},
-					{Version: "1.0.0"},
+				Versions: map[string]VersionPublicInfo{
+					"2.0.0": {Yanked: true},
+					"1.0.0": {Yanked: false},
 				},
 			})
 		case "/api/v1/skills/demo/versions/1.0.0":
@@ -78,22 +75,18 @@ func TestResolveInstallTarget_pinned(t *testing.T) {
 	}
 }
 
-func TestResolveInstallTarget_latestVersionField(t *testing.T) {
+func TestResolveInstallTarget_highestSemverNonYanked(t *testing.T) {
 	prev := HTTPClient
 	t.Cleanup(func() { HTTPClient = prev })
 
 	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		switch r.URL.Path {
 		case "/api/v1/skills/demo":
-			lv := "9.9.9"
 			_ = json.NewEncoder(w).Encode(SkillDetail{
-				Name:          "demo",
-				LatestVersion: &lv,
-				Versions: []struct {
-					Version  string `json:"version"`
-					IsYanked bool   `json:"is_yanked,omitempty"`
-				}{
-					{Version: "0.0.1"},
+				Name: "demo",
+				Versions: map[string]VersionPublicInfo{
+					"9.9.9": {},
+					"0.0.1": {},
 				},
 			})
 		case "/api/v1/skills/demo/versions/9.9.9":
@@ -116,27 +109,22 @@ func TestResolveInstallTarget_latestVersionField(t *testing.T) {
 		t.Fatal(err)
 	}
 	if vd.Version != "9.9.9" {
-		t.Fatalf("expected latest_version 9.9.9, got %+v", vd)
+		t.Fatalf("expected highest semver 9.9.9, got %+v", vd)
 	}
 }
 
-func TestResolveInstallTarget_latestVersionYankedUsesNext(t *testing.T) {
+func TestResolveInstallTarget_highestYankedFallsBack(t *testing.T) {
 	prev := HTTPClient
 	t.Cleanup(func() { HTTPClient = prev })
 
 	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		switch r.URL.Path {
 		case "/api/v1/skills/demo":
-			lv := "2.0.0"
 			_ = json.NewEncoder(w).Encode(SkillDetail{
-				Name:          "demo",
-				LatestVersion: &lv,
-				Versions: []struct {
-					Version  string `json:"version"`
-					IsYanked bool   `json:"is_yanked,omitempty"`
-				}{
-					{Version: "2.0.0", IsYanked: true},
-					{Version: "1.0.0"},
+				Name: "demo",
+				Versions: map[string]VersionPublicInfo{
+					"2.0.0": {Yanked: true},
+					"1.0.0": {Yanked: false},
 				},
 			})
 		case "/api/v1/skills/demo/versions/1.0.0":
@@ -159,6 +147,6 @@ func TestResolveInstallTarget_latestVersionYankedUsesNext(t *testing.T) {
 		t.Fatal(err)
 	}
 	if vd.Version != "1.0.0" {
-		t.Fatalf("expected fallback to 1.0.0 when latest_version is yanked, got %+v", vd)
+		t.Fatalf("expected fallback to 1.0.0 when 2.0.0 is yanked, got %+v", vd)
 	}
 }

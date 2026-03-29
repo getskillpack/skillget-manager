@@ -28,6 +28,9 @@ func FetchJSON(ctx context.Context, path string, out any) error {
 		return err
 	}
 	req.Header.Set("Accept", "application/json")
+	if t := RegistryReadBearer(); t != "" {
+		req.Header.Set("Authorization", "Bearer "+t)
+	}
 
 	res, err := HTTPClient.Do(req)
 	if err != nil {
