@@ -6,6 +6,15 @@
 
 CLI ([cli](https://github.com/getskillpack/cli)) остаётся тонкой оболочкой (`skillget`). Вся логика установки и контракт с реестром живёт здесь, чтобы board и интеграции смотрели на **менеджер** и **registry**, а не только на CLI.
 
+### Где что лежит (матрица, registry, CLI, traceability)
+
+Короткие указатели для сопровождения экосистемы (детали только в целевых документах):
+
+- **Матрица совместимости** (CLI / skillget-manager / registry): [COMPATIBILITY_MATRIX_RU.md](https://github.com/getskillpack/cli/blob/main/docs/COMPATIBILITY_MATRIX_RU.md)
+- **Ops / runbook публичного registry** (`getskillpack/registry`): [PUBLIC_REGISTRY_RUNBOOK.md](https://github.com/getskillpack/registry/blob/main/docs/PUBLIC_REGISTRY_RUNBOOK.md)
+- **CLI** (`getskillpack/cli`) — установка и команды: [README](https://github.com/getskillpack/cli/blob/main/README.md), [Quick start](https://github.com/getskillpack/cli/blob/main/docs/QUICKSTART.md)
+- **Traceability** (ENGINEERING_REQUIREMENTS ↔ тикеты ↔ репозитории): [ENGINEERING_REQUIREMENTS_TRACEABILITY_RU.md](https://github.com/getskillpack/cli/blob/main/docs/ENGINEERING_REQUIREMENTS_TRACEABILITY_RU.md)
+
 ## API (кратко)
 
 - `RegistryBaseURL` / `RegistryConfigSource` — выбор базы API из env (`SKILLGET_REGISTRY_URL`, legacy `SKPKG_REGISTRY_URL`).
